@@ -4,21 +4,27 @@ import { rm, mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 
 async function getData(tag: string) {
+  console.info(`Getting data for ${tag}`);
+
   // Remove old files.
   try {
     await rm(path.join(import.meta.dirname, "cobblemon"), {
       recursive: true,
       force: true,
     });
+    console.info("Removed old git data");
   } catch (error) {
-    console.error(error);
+    console.info("No old git data to remove");
   }
-  console.log(`Getting raw data for ${tag}`);
+
+  console.info("Getting raw data");
 
   // Clone project at given tag.
   await promisify(exec)(
     `git clone --branch ${tag} --single-branch https://gitlab.com/cable-mc/cobblemon.git`
   );
+
+  console.info("Parsing raw data");
 
   const speciesGroupDir = path.join(
     import.meta.dirname,
@@ -52,15 +58,20 @@ async function getData(tag: string) {
     }
   }
 
+  console.info(`Parsed data for ${speciesList.length} species`);
+
   // Read in existing list of versions.
-  const versionListPath = path.join(import.meta.dirname, "../public/versions.json");
+  const versionListPath = path.join(
+    import.meta.dirname,
+    "../public/versions.json"
+  );
   let versionList = JSON.parse(
     await readFile(versionListPath, {
       encoding: "utf-8",
     })
   ) as string[];
   // Add this version to the list.
-  versionList = [...new Set([...versionList, tag])];
+  versionList = [...new Set([...versionList, tag])].sort();
   // Output updated versions list.
   await writeFile(versionListPath, JSON.stringify(versionList, null, 2));
   // Create directory for this version.
@@ -77,6 +88,8 @@ async function getData(tag: string) {
     path.join(outputDir, "species.json"),
     JSON.stringify(speciesList, null, 2)
   );
+
+  console.info("Saved data");
 }
 
 getData(process.argv[2]);
