@@ -1,0 +1,55 @@
+name: Deploy Vite + Svelte to GitHub Pages
+
+# Re‑build on every push to the default branch and on manual runs
+on:
+  push:
+    branches: [main]          # ↳ change if your default branch is different
+  workflow_dispatch:
+
+# The Pages actions need these three permissions
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:                 # prevents two simultaneous deploys
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ► Install Node & your preferred package‑manager
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20            # or whatever you’ve standardised on
+          cache: npm                  # pnpm / yarn? change here & below
+
+      - name: Install dependencies
+        run: npm ci                   # pnpm i / yarn --frozen-lockfile …
+
+      - name: Build static site
+        run: npm run build            # dist/ will be produced by Vite
+
+      # Optional but recommended – stops Jekyll from rewriting files
+      - name: Add .nojekyll
+        run: echo > dist/.nojekyll
+
+      # ► Upload the built site so the next job can deploy it
+      - uses: actions/upload-pages-artifact@v3    # :contentReference[oaicite:0]{index=0}
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4            # :contentReference[oaicite:1]{index=1}
