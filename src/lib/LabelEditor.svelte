@@ -3,6 +3,8 @@
   import Check from "./Check.svelte";
   import Select from "./Select.svelte";
   import Modal from "./Modal.svelte";
+  import JsZip from "jszip";
+  import downloadFile from "downloadfile-js";
 
   let {
     labels,
@@ -45,6 +47,23 @@
     newLabelName = "";
     labelModalShown = false;
   }
+
+  function handleDownload() {
+    const zip = new JsZip();
+    for (let specie of species) {
+      zip.file(
+        `data/cobblemon/species_additions/${specie}.json`,
+        `{"target": "${specie}", "labels": ${JSON.stringify(Object.keys(labelData).filter((label) => labelData[label].includes(specie)))}}`
+      );
+    }
+    zip.file(
+      "pack.mcmeta",
+      `{"pack": { "description": "Custom labels.","pack_format": 48 } }`
+    );
+    zip
+      .generateAsync({ type: "blob" })
+      .then((content) => downloadFile(content, "custom-labels.zip"));
+  }
 </script>
 
 <div>
@@ -58,6 +77,7 @@
     />
     <button onclick={showLabelModal}>+</button>
   </fieldset>
+  <button type="submit" onclick={handleDownload}>Download</button>
   {#if selectedLabel}
     <input
       placeholder="Search species..."

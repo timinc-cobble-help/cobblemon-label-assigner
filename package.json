@@ -16,5 +16,9 @@
     "svelte-check": "^4.1.6",
     "typescript": "~5.8.3",
     "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "downloadfile-js": "github:tmetcalfe89/downloadfile-js",
+    "jszip": "^3.10.1"
   }
 }
