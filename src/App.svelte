@@ -30,21 +30,16 @@
   let versionsList = $state(loadVersions());
 </script>
 
-<main class="container">
-  {#if versionData}
-    {#await versionData}
-      <div>Loading...</div>
-    {:then { labelData, species }}
-      <LabelEditor labels={labelData} {species} />
-    {/await}
-  {:else}
-    {#await versionsList}
-      <div>Loading...</div>
-    {:then list}
-      <VersionPicker
-        versionlist={list}
-        onversionselected={handleSelectVersion}
-      />
-    {/await}
-  {/if}
-</main>
+{#if versionData}
+  {#await versionData}
+    <div>Loading...</div>
+  {:then { labelData, species }}
+    <LabelEditor labels={labelData} {species} />
+  {/await}
+{:else}
+  {#await versionsList}
+    <div>Loading...</div>
+  {:then list}
+    <VersionPicker versionlist={list} onversionselected={handleSelectVersion} />
+  {/await}
+{/if}

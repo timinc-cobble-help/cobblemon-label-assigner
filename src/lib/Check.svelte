@@ -1,11 +1,17 @@
 <script lang="ts">
   let {
     checked,
-    label
-  }: { checked: boolean, label: string } = $props();
+    label,
+    onchange,
+  }: { checked: boolean; label: string; onchange: (checked: boolean) => void } =
+    $props();
 </script>
 
 <label>
-  <input type="checkbox" checked={checked} />
+  <input
+    type="checkbox"
+    {checked}
+    onchange={(e) => onchange(e.currentTarget.checked)}
+  />
   {label}
 </label>
